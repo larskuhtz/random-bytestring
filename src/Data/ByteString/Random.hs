@@ -28,12 +28,10 @@ import GHC.Ptr (Ptr(..))
 
 import Numeric.Natural (Natural)
 
-import System.Random.MWC (uniform, GenIO, create)
+import System.Random.MWC (uniform, GenIO, withSystemRandom)
 
 random ∷ Natural → IO ByteString
-random n = do
-    gen ← create
-    randomGen gen n
+random n = withSystemRandom $ \gen → randomGen gen n
 
 randomGen ∷ GenIO → Natural → IO ByteString
 randomGen gen n =
