@@ -8,7 +8,6 @@
 -- License: MIT
 -- Maintainer: lakuhtz@gmail.com
 -- Stability: experimental
---
 -- -------------------------------------------------------------------------- --
 
 module Data.ByteString.Random
@@ -30,10 +29,31 @@ import Numeric.Natural (Natural)
 
 import System.Random.MWC (uniform, GenIO, withSystemRandom)
 
-random ∷ Natural → IO ByteString
+-- $setup
+-- >>> import qualified Data.ByteString as B
+-- >>> import Test.QuickCheck
+
+-- | Generate a random bytestring of length n. The PRNG is seeded
+-- from the system randomness source.
+--
+-- prop> ioProperty $ ((fromIntegral n ===) . B.length) <$> random n
+-- prop> n > 4 ==> ioProperty $ (/=) <$> random n <*> random n
+--
+random
+    ∷ Natural
+        -- ^ Length of the result bytestring in bytes
+    → IO ByteString
 random n = withSystemRandom $ \gen → randomGen gen n
 
-randomGen ∷ GenIO → Natural → IO ByteString
+-- | Generate a random bytestring of length n using the given
+-- PRNG.
+--
+randomGen
+    ∷ GenIO
+        -- ^ A PRNG that is used to generate random bytes.
+    → Natural
+        -- ^ Length of the result bytestring in bytes
+    → IO ByteString
 randomGen gen n =
     bracketOnError (mallocBytes len8) free $ \ptr@(Ptr !addr) → do
         {-# SCC "go" #-} go ptr
