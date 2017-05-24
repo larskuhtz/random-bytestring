@@ -1,5 +1,5 @@
 Name: random-bytestring
-Version: 0.0.1
+Version: 0.1.0
 Synopsis: Efficient generation of random bytestrings
 Description:
     Efficient generation of random bytestrings
@@ -84,7 +84,7 @@ Benchmark benchmark-compare
 
     other-modules:
         Benchmarks,
-        Implementations 
+        Implementations
 
 Benchmark eventlog-compare
     default-language: Haskell2010
@@ -105,4 +105,4 @@ Benchmark eventlog-compare
         random >= 1.1
     other-modules:
         Benchmarks,
-        Implementations 
+        Implementations
