@@ -57,6 +57,9 @@ Benchmark benchmark
         build-depends:
             nats >= 1.1
 
+    if impl(ghc < 7.10)
+        buildable: False
+
     other-modules:
         Benchmarks
 
@@ -81,6 +84,9 @@ Benchmark benchmark-compare
     if impl(ghc < 7.10)
         build-depends:
             nats >= 1.1
+
+    if impl(ghc < 7.10)
+        buildable: False
 
     other-modules:
         Benchmarks,
@@ -107,6 +113,9 @@ Benchmark eventlog-compare
     if impl(ghc < 7.10)
         build-depends:
             nats >= 1.1
+
+    if impl(ghc < 7.10)
+        buildable: False
 
     other-modules:
         Benchmarks,
