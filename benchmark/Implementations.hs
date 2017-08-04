@@ -66,7 +66,7 @@ allImplementations =
 -- Basic
 
 random ∷ Natural → IO ByteString
-random n = (pack . take (fromIntegral n) . randoms) <$> getStdGen
+random n = fmap (pack . take (fromIntegral n) . randoms) getStdGen
 
 -- -------------------------------------------------------------------------- --
 -- entropy
