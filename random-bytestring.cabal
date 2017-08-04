@@ -103,6 +103,11 @@ Benchmark eventlog-compare
         mwc-random >= 0.13,
         primitive >= 0.6,
         random >= 1.1
+
+    if impl(ghc < 7.10)
+        build-depends:
+            nats >= 1.1
+
     other-modules:
         Benchmarks,
         Implementations
