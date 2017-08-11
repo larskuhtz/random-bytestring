@@ -192,7 +192,7 @@ mwcUnfoldr n = do
         → Box m
         → Maybe (Word8, Box m)
     step !gen (Box !s) =
-        let (# !s', !b #) = internal (uniform gen ∷ m Word8) s
+        let !(# !s', !b #) = internal (uniform gen ∷ m Word8) s
         in Just (b, Box s')
 
 -- -------------------------------------------------------------------------- --
@@ -216,6 +216,6 @@ mwcUnfoldrIO n = do
         → Box IO
         → Maybe (Word8, Box IO)
     step !gen (Box !s) =
-        let (# !s', !b #) = internal (uniform gen ∷ IO Word8) s
+        let !(# !s', !b #) = internal (uniform gen ∷ IO Word8) s
         in Just (b, Box s')
 
