@@ -26,6 +26,9 @@ module Implementations
 , mwcMalloc8
 , mwcMalloc32
 , mwcMalloc64
+
+--
+, pcgMalloc64
 ) where
 
 import Control.Exception (bracketOnError)
@@ -46,6 +49,8 @@ import System.Entropy (getEntropy)
 import System.Random (randoms, getStdGen)
 import System.Random.MWC (uniform, create, Gen)
 
+import qualified System.Random.PCG as PCG (uniform, create, Gen)
+
 import Benchmarks
 
 -- -------------------------------------------------------------------------- --
@@ -60,6 +65,7 @@ allImplementations =
     , Impl "mwc-malloc-8" mwcMalloc8
     , Impl "mwc-malloc-32" mwcMalloc32
     , Impl "mwc-malloc-64" mwcMalloc64
+    , Impl "pcg-malloc-64" pcgMalloc64
     ]
 
 -- -------------------------------------------------------------------------- --
@@ -218,4 +224,43 @@ mwcUnfoldrIO n = do
     step !gen (Box !s) =
         let !(# !s', !b #) = internal (uniform gen ∷ IO Word8) s
         in Just (b, Box s')
+
+-- -------------------------------------------------------------------------- --
+-- PCG Malloc64
+
+pcgMalloc64 ∷ Natural → IO ByteString
+pcgMalloc64 n = do
+    !gen ← PCG.create
+    bracketOnError (mallocBytes len8) free $ \ptr@(Ptr !addr) → do
+        go gen ptr
+        unsafePackAddressLen len8 addr
+  where
+    len8, len64 ∷ Int
+    !len8 = fromIntegral n
+    !len64 = len8 `div` 8
+
+    go ∷ PCG.Gen (PrimState IO) → Ptr Word64 → IO ()
+    go !gen !startPtr = loop64 startPtr
+      where
+        fin64Ptr ∷ Ptr Word64
+        !fin64Ptr = startPtr `plusPtr` (len64 * 8)
+
+        loop64 ∷ Ptr Word64 → IO ()
+        loop64 !curPtr
+            | curPtr < fin64Ptr = do
+                !b ← PCG.uniform gen ∷ IO Word64
+                poke curPtr b
+                loop64 $ curPtr `plusPtr` 8
+            | otherwise = loop8 $ castPtr curPtr
+
+        fin8Ptr ∷ Ptr Word8
+        !fin8Ptr = startPtr `plusPtr` len8
+
+        loop8 ∷ Ptr Word8 → IO ()
+        loop8 !curPtr
+            | curPtr < fin8Ptr = do
+                !b ← PCG.uniform gen ∷ IO Word8
+                poke curPtr b
+                loop8 $ curPtr `plusPtr` 1
+            | otherwise = return ()
 
