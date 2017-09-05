@@ -16,8 +16,12 @@ module Main
 
 import Benchmarks
 import Criterion.Main
-import Data.ByteString.Random
+import qualified Data.ByteString.Random.MWC as MWC
+import qualified Data.ByteString.Random.PCG as PCG
 
 main ∷ IO ()
-main = defaultMain $ largeBenchmarks [Impl "Data.ByteString.Random" random]
+main = defaultMain $ compareBenchmarks
+    [ Impl "random-bytestring+mwc" MWC.random
+    , Impl "random-bytestring+pcg" PCG.random
+    ]
 
