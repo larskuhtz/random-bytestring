@@ -10,7 +10,6 @@
 -- License: MIT
 -- Maintainer: lakuhtz@gmail.com
 -- Stability: experimental
--- -------------------------------------------------------------------------- --
 
 module Data.ByteString.Random.MWC
 ( random
