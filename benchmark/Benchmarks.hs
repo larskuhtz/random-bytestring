@@ -14,6 +14,7 @@ module Benchmarks
 ( Impl(..)
 , benchmarks
 , largeBenchmarks
+, compareBenchmarks
 ) where
 
 import Criterion
@@ -42,7 +43,7 @@ largeBenchmarks impls =
         [ singleThreaded impls 1024
         , singleThreaded impls (1024 * 1024)
         , singleThreaded impls (1024 * 1024 * 10)
-        , singleThreaded impls (1024 * 1024 * 100)
+        -- , singleThreaded impls (1024 * 1024 * 100)
         ]
     , bgroup "multi-threaded"
         [ concurrent impls 10 1024
@@ -52,14 +53,21 @@ largeBenchmarks impls =
         ]
     ]
 
+compareBenchmarks ∷ [Impl] →  [Benchmark]
+compareBenchmarks impls =
+    [ singleThreaded impls (1024 * 1024)
+    , singleThreaded impls (1024 * 1024 * 10)
+    -- , singleThreaded impls (1024 * 1024 * 100)
+    ]
+
 concurrent ∷ [Impl] → Natural → Natural → Benchmark
-concurrent impls c n = bgroup (show c <> "-" <> show n)
+concurrent impls c n = bgroup (show c <> "-" <> show n <> "-bytes")
     [ cgo label f | (Impl label f) ←  impls ]
   where
     cgo s f = bench s $ nfIO $
         forConcurrently [0..(c-1)] (const $ f n)
 
 singleThreaded ∷ [Impl] → Natural → Benchmark
-singleThreaded impls n = bgroup (show n)
+singleThreaded impls n = bgroup (show n <> "-bytes")
     [ bench label $ nfIO $ f n | (Impl label f) ←  impls ]
 

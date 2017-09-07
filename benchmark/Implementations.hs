@@ -19,6 +19,8 @@ module Implementations
 
 , random
 , entropy
+, cryptoSystem
+, cryptoChaCha
 , mwcUnfoldr
 , mwcUnfoldrIO
 
@@ -26,10 +28,15 @@ module Implementations
 , mwcMalloc8
 , mwcMalloc32
 , mwcMalloc64
+
+--
+, pcgMalloc64
 ) where
 
 import Control.Exception (bracketOnError)
 import Control.Monad.Primitive
+
+import Crypto.Random (getRandomBytes, drgNew, getSystemDRG, withDRG)
 
 import Data.ByteString (ByteString, pack, unfoldrN)
 import Data.ByteString.Unsafe (unsafePackAddressLen)
@@ -44,7 +51,8 @@ import Numeric.Natural
 
 import System.Entropy (getEntropy)
 import System.Random (randoms, getStdGen)
-import System.Random.MWC (uniform, create, Gen)
+import qualified System.Random.MWC as MWC (uniform, create, Gen)
+import qualified System.Random.PCG as PCG (uniform, create, Gen)
 
 import Benchmarks
 
@@ -55,11 +63,14 @@ allImplementations ∷ [Impl]
 allImplementations =
     [ Impl "random" random
     , Impl "entropy" entropy
+    , Impl "cryptonite-system" cryptoSystem
+    , Impl "cryptonite-chacha" cryptoChaCha
     , Impl "mwc-unfoldr" mwcUnfoldr
     , Impl "mwc-unfoldr-io" mwcUnfoldrIO
     , Impl "mwc-malloc-8" mwcMalloc8
     , Impl "mwc-malloc-32" mwcMalloc32
     , Impl "mwc-malloc-64" mwcMalloc64
+    , Impl "pcg-malloc-64" pcgMalloc64
     ]
 
 -- -------------------------------------------------------------------------- --
@@ -75,11 +86,24 @@ entropy ∷ Natural → IO ByteString
 entropy n = getEntropy (fromIntegral n)
 
 -- -------------------------------------------------------------------------- --
+-- cryptonite getRandomBytes
+
+cryptoSystem ∷ Natural → IO ByteString
+cryptoSystem n = do
+    gen ← getSystemDRG
+    return $ fst (withDRG gen $ getRandomBytes (fromIntegral n))
+
+cryptoChaCha ∷ Natural → IO ByteString
+cryptoChaCha n = do
+    gen ← drgNew
+    return $ fst (withDRG gen $ getRandomBytes (fromIntegral n))
+
+-- -------------------------------------------------------------------------- --
 -- Malloc8
 
 mwcMalloc8 ∷ Natural → IO ByteString
 mwcMalloc8 n = do
-    !gen ← create
+    !gen ← MWC.create
     bracketOnError (mallocBytes len) free $ \ptr@(Ptr !addr) → do
         go gen ptr
         unsafePackAddressLen len addr
@@ -93,7 +117,7 @@ mwcMalloc8 n = do
         loop !i
             | i == pred len = return ()
             | otherwise = do
-                !b ← uniform gen ∷ IO Word8
+                !b ← MWC.uniform gen ∷ IO Word8
                 poke (ptr `plusPtr` i) b
                 loop (succ i)
 
@@ -102,7 +126,7 @@ mwcMalloc8 n = do
 
 mwcMalloc32 ∷ Natural → IO ByteString
 mwcMalloc32 n = do
-    !gen ← create
+    !gen ← MWC.create
     bracketOnError (mallocBytes len8) free $ \ptr@(Ptr !addr) → do
         go gen ptr
         unsafePackAddressLen len8 addr
@@ -116,7 +140,7 @@ mwcMalloc32 n = do
         !fin32Ptr = startPtr `plusPtr` (len32 * 4)
         loop32 !curPtr
             | curPtr < fin32Ptr = do
-                !b ← uniform gen ∷ IO Word32
+                !b ← MWC.uniform gen ∷ IO Word32
                 poke curPtr b
                 loop32 $ curPtr `plusPtr` 4
             | otherwise = loop8 $ castPtr curPtr
@@ -124,7 +148,7 @@ mwcMalloc32 n = do
         !fin8Ptr = startPtr `plusPtr` len8
         loop8 !curPtr
             | curPtr < fin8Ptr = do
-                !b ← uniform gen ∷ IO Word8
+                !b ← MWC.uniform gen ∷ IO Word8
                 poke curPtr b
                 loop8 $ curPtr `plusPtr` 1
             | otherwise = return ()
@@ -135,7 +159,7 @@ mwcMalloc32 n = do
 
 mwcMalloc64 ∷ Natural → IO ByteString
 mwcMalloc64 n = do
-    !gen ← create
+    !gen ← MWC.create
     bracketOnError (mallocBytes len8) free $ \ptr@(Ptr !addr) → do
         go gen ptr
         unsafePackAddressLen len8 addr
@@ -144,7 +168,7 @@ mwcMalloc64 n = do
     !len8 = fromIntegral n
     !len64 = len8 `div` 8
 
-    go ∷ Gen (PrimState IO) → Ptr Word64 → IO ()
+    go ∷ MWC.Gen (PrimState IO) → Ptr Word64 → IO ()
     go !gen !startPtr = loop64 startPtr
       where
         fin64Ptr ∷ Ptr Word64
@@ -153,7 +177,7 @@ mwcMalloc64 n = do
         loop64 ∷ Ptr Word64 → IO ()
         loop64 !curPtr
             | curPtr < fin64Ptr = do
-                !b ← uniform gen ∷ IO Word64
+                !b ← MWC.uniform gen ∷ IO Word64
                 poke curPtr b
                 loop64 $ curPtr `plusPtr` 8
             | otherwise = loop8 $ castPtr curPtr
@@ -164,7 +188,7 @@ mwcMalloc64 n = do
         loop8 ∷ Ptr Word8 → IO ()
         loop8 !curPtr
             | curPtr < fin8Ptr = do
-                !b ← uniform gen ∷ IO Word8
+                !b ← MWC.uniform gen ∷ IO Word8
                 poke curPtr b
                 loop8 $ curPtr `plusPtr` 1
             | otherwise = return ()
@@ -176,11 +200,11 @@ data Box m = Box !(State# (PrimState m))
 
 mwcUnfoldr ∷ ∀ m . (PrimMonad m, PrimBase m) ⇒ Natural → m ByteString
 mwcUnfoldr n = do
-    !gen ← create
+    !gen ← MWC.create
     primitive $ go gen
   where
     go
-        ∷ Gen (PrimState m)
+        ∷ MWC.Gen (PrimState m)
         → State# (PrimState m)
         → (# State# (PrimState m), ByteString #)
     go !gen !st =
@@ -188,11 +212,11 @@ mwcUnfoldr n = do
         in (# st', b #)
 
     step
-        ∷ Gen (PrimState m)
+        ∷ MWC.Gen (PrimState m)
         → Box m
         → Maybe (Word8, Box m)
     step !gen (Box !s) =
-        let !(# !s', !b #) = internal (uniform gen ∷ m Word8) s
+        let !(# !s', !b #) = internal (MWC.uniform gen ∷ m Word8) s
         in Just (b, Box s')
 
 -- -------------------------------------------------------------------------- --
@@ -200,11 +224,11 @@ mwcUnfoldr n = do
 
 mwcUnfoldrIO ∷ Natural → IO ByteString
 mwcUnfoldrIO n = do
-    !gen ← create
+    !gen ← MWC.create
     primitive $ go gen
   where
     go
-        ∷ Gen (PrimState IO)
+        ∷ MWC.Gen (PrimState IO)
         → State# (PrimState IO)
         → (# State# (PrimState IO), ByteString #)
     go !gen !st =
@@ -212,10 +236,49 @@ mwcUnfoldrIO n = do
         in (# st', b #)
 
     step
-        ∷ Gen (PrimState IO)
+        ∷ MWC.Gen (PrimState IO)
         → Box IO
         → Maybe (Word8, Box IO)
     step !gen (Box !s) =
-        let !(# !s', !b #) = internal (uniform gen ∷ IO Word8) s
+        let !(# !s', !b #) = internal (MWC.uniform gen ∷ IO Word8) s
         in Just (b, Box s')
+
+-- -------------------------------------------------------------------------- --
+-- PCG Malloc64
+
+pcgMalloc64 ∷ Natural → IO ByteString
+pcgMalloc64 n = do
+    !gen ← PCG.create
+    bracketOnError (mallocBytes len8) free $ \ptr@(Ptr !addr) → do
+        go gen ptr
+        unsafePackAddressLen len8 addr
+  where
+    len8, len64 ∷ Int
+    !len8 = fromIntegral n
+    !len64 = len8 `div` 8
+
+    go ∷ PCG.Gen (PrimState IO) → Ptr Word64 → IO ()
+    go !gen !startPtr = loop64 startPtr
+      where
+        fin64Ptr ∷ Ptr Word64
+        !fin64Ptr = startPtr `plusPtr` (len64 * 8)
+
+        loop64 ∷ Ptr Word64 → IO ()
+        loop64 !curPtr
+            | curPtr < fin64Ptr = do
+                !b ← PCG.uniform gen ∷ IO Word64
+                poke curPtr b
+                loop64 $ curPtr `plusPtr` 8
+            | otherwise = loop8 $ castPtr curPtr
+
+        fin8Ptr ∷ Ptr Word8
+        !fin8Ptr = startPtr `plusPtr` len8
+
+        loop8 ∷ Ptr Word8 → IO ()
+        loop8 !curPtr
+            | curPtr < fin8Ptr = do
+                !b ← PCG.uniform gen ∷ IO Word8
+                poke curPtr b
+                loop8 $ curPtr `plusPtr` 1
+            | otherwise = return ()
 

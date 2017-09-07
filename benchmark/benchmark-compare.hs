@@ -19,5 +19,5 @@ import Criterion.Main
 import Implementations
 
 main ∷ IO ()
-main = defaultMain $ benchmarks allImplementations
+main = defaultMain $ compareBenchmarks allImplementations
 
