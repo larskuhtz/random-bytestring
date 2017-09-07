@@ -7,8 +7,8 @@ Description:
     64 bit words (and 8 bit words for remaining bytes at the end of
     the bytestring).
     .
-    Random words are generated using the PRNG from the
-    [mwc-random](https://hackage.haskell.org/package/mwc-random) package
+    Random words are generated using the PRNG from
+    the [mwc-random](https://hackage.haskell.org/package/mwc-random) package
     or the [pcg-random](https://hackage.haskell.org/package/pcg-random)
     package. It is also possible to use a custom PRNG by providing
     an instance for the 'RandomWords' type class and using the function
@@ -18,9 +18,9 @@ Description:
     applications. They are /not/ suitable for cryptographic
     applications.
     .
-    ![benchmarks](benchmarks.png)
+    ![benchmarks](https://hackage.haskell.org/package/random-bytestring-0.1.2/src/benchmarks.png)
     .
-    ![detailed benchmarks](benchmarks-details.png)
+    ![detailed benchmarks](https://hackage.haskell.org/package/random-bytestring-0.1.2/src/benchmarks-details.png)
 
 Homepage: https://www.github.com/larskuhtz/random-bytestring
 License: MIT
