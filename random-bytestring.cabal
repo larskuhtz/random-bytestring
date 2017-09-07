@@ -1,5 +1,5 @@
 Name: random-bytestring
-Version: 0.1.1
+Version: 0.1.2
 Synopsis: Efficient generation of random bytestrings
 Description:
     Efficient generation of random bytestrings. The implementation

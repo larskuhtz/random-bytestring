@@ -1,3 +1,17 @@
+0.1.2
+=====
+
+*   Add support for PCG as PRNG in addition to MWC.
+
+    The module `Data.ByteString.Random.PCG` uses PCG. The module
+    `Data.ByteString.Random.MWC` uses MWC. The module `Data.ByteString.Random`
+    uses MWC for backward compatibility.
+
+*   Support usage of custom PRNGs through the type class `RandomWords` and the
+    function `generate` in the module `Data.ByteString.Random.Internal`.
+
+*   Add some benchmark results to package description
+
 0.1.1
 =====
 
