@@ -25,7 +25,7 @@ import Numeric.Natural
 
 data Impl = Impl String (Natural → IO ByteString)
 
-benchmarks ∷ [Impl] →  [Benchmark]
+benchmarks ∷ [Impl] → [Benchmark]
 benchmarks impls =
     [ bgroup "single-threaded"
         [ singleThreaded impls 1024
@@ -37,7 +37,7 @@ benchmarks impls =
         ]
     ]
 
-largeBenchmarks ∷ [Impl] →  [Benchmark]
+largeBenchmarks ∷ [Impl] → [Benchmark]
 largeBenchmarks impls =
     [ bgroup "single-threaded"
         [ singleThreaded impls 1024
@@ -53,7 +53,7 @@ largeBenchmarks impls =
         ]
     ]
 
-compareBenchmarks ∷ [Impl] →  [Benchmark]
+compareBenchmarks ∷ [Impl] → [Benchmark]
 compareBenchmarks impls =
     [ singleThreaded impls (1024 * 1024)
     , singleThreaded impls (1024 * 1024 * 10)
