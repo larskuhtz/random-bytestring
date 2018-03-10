@@ -30,7 +30,7 @@ Copyright: Copyright (c) 2017 Lars Kuhtz <lakuhtz@gmail.com>
 Category: System
 Build-type: Simple
 Cabal-version: >= 1.18
-Tested-With: GHC == 7.8.4, GHC == 7.10.2, GHC == 8.0.2, GHC == 8.2.1
+Tested-With: GHC == 7.8.4, GHC == 7.10.2, GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.1
 License-file: LICENSE
 
 extra-doc-files:
@@ -54,7 +54,7 @@ Library
         Data.ByteString.Random.MWC
 
     build-depends:
-        base >= 4.7 && < 4.11,
+        base >= 4.7 && < 4.12,
         bytestring >= 0.10,
         mwc-random >= 0.13,
         pcg-random >= 0.1
@@ -74,7 +74,7 @@ Benchmark benchmark
     build-depends:
         random-bytestring,
         async >= 2.1,
-        base >= 4.7 && < 4.11,
+        base >= 4.7 && < 4.12,
         bytestring >= 0.10,
         criterion >= 1.1,
         entropy >= 0.3,
@@ -105,7 +105,7 @@ Benchmark benchmark-compare
     build-depends:
         random-bytestring,
         async >= 2.1,
-        base >= 4.7 && < 4.11,
+        base >= 4.7 && < 4.12,
         bytestring >= 0.10,
         criterion >= 1.1,
         entropy >= 0.3,
@@ -136,7 +136,7 @@ Benchmark eventlog-compare
     build-depends:
         random-bytestring,
         async >= 2.1,
-        base >= 4.7 && < 4.11,
+        base >= 4.7 && < 4.12,
         bytestring >= 0.10,
         criterion >= 1.1,
         entropy >= 0.3,
