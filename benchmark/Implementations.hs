@@ -1,13 +1,14 @@
-{-# LANGUAGE UnicodeSyntax #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE UnicodeSyntax #-}
 
 -- -------------------------------------------------------------------------- --
 -- |
 -- Module: Implementations
--- Copyright: (c) Lars Kuhtz <lakuhtz@gmail.com> 2017
+-- Copyright: (c) Lars Kuhtz <lakuhtz@gmail.com> 2017-2018
 -- License: MIT
 -- Maintainer: lakuhtz@gmail.com
 -- Stability: experimental
@@ -29,8 +30,10 @@ module Implementations
 , mwcMalloc32
 , mwcMalloc64
 
+#ifdef MIN_VERSION_pcg_random
 --
 , pcgMalloc64
+#endif
 ) where
 
 import Control.Exception (bracketOnError)
@@ -52,7 +55,9 @@ import Numeric.Natural
 import System.Entropy (getEntropy)
 import System.Random (randoms, getStdGen)
 import qualified System.Random.MWC as MWC (uniform, create, Gen)
+#ifdef MIN_VERSION_pcg_random
 import qualified System.Random.PCG as PCG (uniform, create, Gen)
+#endif
 
 import Benchmarks
 
@@ -70,7 +75,9 @@ allImplementations =
     , Impl "mwc-malloc-8" mwcMalloc8
     , Impl "mwc-malloc-32" mwcMalloc32
     , Impl "mwc-malloc-64" mwcMalloc64
+#ifdef MIN_VERSION_pcg_random
     , Impl "pcg-malloc-64" pcgMalloc64
+#endif
     ]
 
 -- -------------------------------------------------------------------------- --
@@ -243,6 +250,7 @@ mwcUnfoldrIO n = do
         let !(# !s', !b #) = internal (MWC.uniform gen ∷ IO Word8) s
         in Just (b, Box s')
 
+#ifdef MIN_VERSION_pcg_random
 -- -------------------------------------------------------------------------- --
 -- PCG Malloc64
 
@@ -281,4 +289,5 @@ pcgMalloc64 n = do
                 poke curPtr b
                 loop8 $ curPtr `plusPtr` 1
             | otherwise = return ()
+#endif
 
