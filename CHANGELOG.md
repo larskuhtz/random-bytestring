@@ -1,3 +1,9 @@
+0.1.3.1 (2018-03-18)
+====================
+
+*   Put dependency on pcg-random behind a cabal flag, which is on by default.
+    This enables builds stackage nightly.
+
 0.1.3 (2018-03-17)
 ==================
 

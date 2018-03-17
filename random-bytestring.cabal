@@ -1,5 +1,5 @@
 Name: random-bytestring
-Version: 0.1.3
+Version: 0.1.3.1
 Synopsis: Efficient generation of random bytestrings
 Description:
     Efficient generation of random bytestrings. The implementation
@@ -18,9 +18,9 @@ Description:
     applications. They are /not/ suitable for cryptographic
     applications.
     .
-    ![benchmarks](https://hackage.haskell.org/package/random-bytestring-0.1.3/src/benchmarks.png)
+    ![benchmarks](https://hackage.haskell.org/package/random-bytestring-0.1.3.1/src/benchmarks.png)
     .
-    ![detailed benchmarks](https://hackage.haskell.org/package/random-bytestring-0.1.3/src/benchmarks-details.png)
+    ![detailed benchmarks](https://hackage.haskell.org/package/random-bytestring-0.1.3.1/src/benchmarks-details.png)
 
 Homepage: https://www.github.com/larskuhtz/random-bytestring
 License: MIT
