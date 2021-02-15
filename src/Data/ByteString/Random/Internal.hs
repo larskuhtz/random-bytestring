@@ -74,7 +74,7 @@ generate g n =
             | curPtr < fin64Ptr = {-# SCC "loop64" #-} do
                 !b ← uniformW64 g
                 {-# SCC "poke64" #-} poke curPtr b
-                loop64 $ {-# SCC "ptr_inc" #-} curPtr `plusPtr` 8
+                loop64 $ curPtr `plusPtr` 8
             | otherwise = loop8 $ castPtr curPtr
 
         -- Generate 8bit values
