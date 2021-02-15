@@ -3,7 +3,7 @@ Version: 0.1.4
 Synopsis: Efficient generation of random bytestrings
 Description:
     __This package is deprecated__. Please, use
-    [@genByteString@](https://hackage.haskell.org/package/random-1.2.0/docs/System-Random.html#v:genByteString) from the [random
+    'genByteString' from the [random
     package (version >=1.2)](https://hackage.haskell.org/package/random) instead.
     .
     Efficient generation of random bytestrings. The implementation
